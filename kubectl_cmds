@@ -1,0 +1,147 @@
+
+Tools and utility scripts are here: 
+
+[cov3lgsdops02vm]
+
+[root@cov3lgsdops02vm utils]# pwd
+/home/kulkarnp/kube/utils
+
+[root@cov3lgsdops02vm utils]# ls -lart
+total 20
+-rwxr-xr-x. 1 root root  180 Aug  8 08:29 enable_start_kube.sh
+-rwxr-xr-x. 1 root root  156 Aug  8 08:41 kube_node_start.sh
+-rw-r--r--. 1 root root   96 Aug  8 09:51 kube-system.json
+-rwxr-xr-x. 1 root root  201 Aug  9 09:07 kube_master_status.sh
+
+
+[cov3lgsdops01vm]
+
+[root@cov3lgsdops01vm kulkarnp]# pwd
+/home/kulkarnp
+[root@cov3lgsdops01vm kulkarnp]# ls -lart
+total 48
+-rwxr-xr-x.  1 root     root  157 Aug  8 08:41 kube_node_start.sh
+-rwxr-xr-x.  1 root     root  180 Aug  9 09:08 kube_node_status.sh
+
+------------------------------------------------------------------------------
+
+View pods and services
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl get pods --namespace=kube-system
+NAME                                   READY     STATUS    RESTARTS   AGE
+kubernetes-dashboard-407475801-odsbm   1/1       Running   0          9s
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl get services  --namespace=kube-system
+NAME                   CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+kubernetes-dashboard   10.5.25.204   nodes         80/TCP    7s
+
+------------------------------------------------------------------------------
+
+Running kubectl from the nodes
+
+[root@cov3lgsdops01vm kulkarnp]# kubectl -s 10.5.25.204:8080 get pods --namespace=kube-system
+NAME                                   READY     STATUS    RESTARTS   AGE
+kubernetes-dashboard-407475801-odsbm   1/1       Running   0          17m
+
+------------------------------------------------------------------------------
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl describe pod  kubernetes-dashboard-330049186-4m0rd  --namespace=kube-system
+Name:           kubernetes-dashboard-330049186-4m0rd
+Namespace:      kube-system
+Node:           10.5.25.204/10.5.25.204
+Start Time:     Mon, 08 Aug 2016 11:59:48 -0500
+Labels:         app=kubernetes-dashboard,pod-template-hash=330049186
+Status:         Pending
+IP:
+Controllers:    ReplicaSet/kubernetes-dashboard-330049186
+Containers:
+  kubernetes-dashboard:
+    Container ID:
+    Image:              cov3lgsdops01vm:5000/kubernetes-dashboard-amd64:v1.1.0
+    Image ID:
+    Port:               9090/TCP
+    QoS Tier:
+      cpu:              BestEffort
+      memory:           BestEffort
+    State:              Waiting
+      Reason:           ContainerCreating
+    Ready:              False
+    Restart Count:      0
+    Liveness:           http-get http://:9090/ delay=30s timeout=30s period=10s #success=1 #failure=3
+    Environment Variables:
+Conditions:
+  Type          Status
+  Ready         False
+No volumes.
+Events:
+  FirstSeen     LastSeen        Count   From                    SubobjectPath   Type            Reason          Message
+  ---------     --------        -----   ----                    -------------   --------        ------          -------
+  26s           26s             1       {default-scheduler }                    Normal          Scheduled       Successfully assigned kubernetes-dashboard-330049186-4m0rd to 10.5.25.204
+
+------------------------------------------------------------------------------
+
+List etcd content
+
+[root@cov3lgsdops02vm kulkarnp]# etcdctl ls /registry/events/default/
+/registry/events/default/10.5.25.204.14692834fb501599
+/registry/events/default/10.5.25.203.1468efc0b872e380
+
+[root@cov3lgsdops02vm kulkarnp]# etcdctl ls /
+/atomic.io
+/registry
+
+------------------------------------------------------------------------------
+
+Readable format for etcd events
+
+[root@cov3lgsdops02vm kulkarnp]# etcdctl get /registry/events/default/10.5.25.204.14692834fb501599 | python -mjson.tool
+{
+    "apiVersion": "v1",
+    "count": 9,
+    "firstTimestamp": "2016-08-09T13:56:01Z",
+    "involvedObject": {
+        "kind": "Node",
+        "name": "10.5.25.204",
+        "uid": "10.5.25.204"
+    },
+    "kind": "Event",
+    "lastTimestamp": "2016-08-09T14:07:42Z",
+    "message": "kubelet does not have ClusterDNS IP configured and cannot create Pod using \"ClusterFirst\" policy. pod: \"kubernetes-dashboard-330049186-49pl2_kube-system(0187a660-5e39-11e6-91e1-005056a2363a)\". Falling back to DNSDefault policy.",
+    "metadata": {
+        "creationTimestamp": "2016-08-09T13:56:01Z",
+        "deletionTimestamp": "2016-08-09T15:02:23Z",
+        "name": "10.5.25.204.14692834fb501599",
+        "namespace": "default",
+        "uid": "018a9584-5e39-11e6-91e1-005056a2363a"
+    },
+    "reason": "MissingClusterDNS",
+    "source": {
+        "component": "kubelet",
+        "host": "10.5.25.204"
+    },
+    "type": "Warning"
+}
+
+------------------------------------------------------------------------------
+
+Delete deployment (no more restarts)
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl delete deployment kubernetes-dashboard
+deployment "kubernetes-dashboard" deleted
+
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl delete service kubernetes-dashboard --namespace=kube-system
+service "kubernetes-dashboard" deleted
+
+------------------------------------------------------------------------------
+
+Run a container image under kubectl directly
+
+kubectl run kubernetes-dashboard --namespace=kube-system --image=cov3lgsdops01vm:5000/kubernetes-dashboard-amd64:v1.1.0 --env="KUBE_INSECURE=true" --command -- /dashboard --port=9090 --apiserver-host=http://10.5.25.204:8080
+
+Get yaml pod descriptor from the running pod above:
+
+kubectl get pod kubernetes-dashboard-180266904-gaxyi -o yaml
+
+------------------------------------------------------------------------------
+

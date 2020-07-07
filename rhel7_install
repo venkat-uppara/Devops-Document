@@ -1,0 +1,404 @@
+######################################################################
+# Docker private/local registry = 10.5.25.203:5000                   #
+#                                                                    #
+# Kubernetes master = cov3lgsdops02vm                                #
+#                                                                    #
+#  Kubernetes node 1 = cov3lgsdops02vm                               #
+#  Kubernetes node 2 = cov3lgsdops01vm                               #
+#                                                                    #
+######################################################################
+
+
+
+RHEL / CentOS 7 install
+Based on:
+http://severalnines.com/blog/installing-kubernetes-cluster-minions-centos7-manage-pods-services
+------------------------------------------------------------------------------------------------
+
+
+Master
+
+1) yum -y install etcd kubernetes
+
+[root@cov3lgsdops02vm kulkarnp]# yum -y install etcd kubernetes
+Loaded plugins: langpacks, product-id, rhnplugin, search-disabled-repos, subscription-manager
+This system is receiving updates from RHN Classic or Red Hat Satellite.
+Resolving Dependencies
+--> Running transaction check
+---> Package etcd.x86_64 0:2.3.7-2.el7 will be installed
+---> Package kubernetes.x86_64 0:1.2.0-0.13.gitec7364b.el7 will be installed
+--> Processing Dependency: kubernetes-node = 1.2.0-0.13.gitec7364b.el7 for package: kubernetes-1.2.0-0.13.gitec7364b.el7.x86_64
+--> Processing Dependency: kubernetes-master = 1.2.0-0.13.gitec7364b.el7 for package: kubernetes-1.2.0-0.13.gitec7364b.el7.x86_64
+--> Running transaction check
+---> Package kubernetes-master.x86_64 0:1.2.0-0.13.gitec7364b.el7 will be installed
+--> Processing Dependency: kubernetes-client = 1.2.0-0.13.gitec7364b.el7 for package: kubernetes-master-1.2.0-0.13.gitec7364b.el7.x86_64
+---> Package kubernetes-node.x86_64 0:1.2.0-0.13.gitec7364b.el7 will be installed
+--> Processing Dependency: socat for package: kubernetes-node-1.2.0-0.13.gitec7364b.el7.x86_64
+--> Processing Dependency: docker for package: kubernetes-node-1.2.0-0.13.gitec7364b.el7.x86_64
+--> Running transaction check
+---> Package docker.x86_64 0:1.10.3-46.el7.10 will be installed
+--> Processing Dependency: docker-rhel-push-plugin = 1.10.3-46.el7.10 for package: docker-1.10.3-46.el7.10.x86_64
+--> Processing Dependency: docker-common = 1.10.3-46.el7.10 for package: docker-1.10.3-46.el7.10.x86_64
+--> Processing Dependency: oci-register-machine >= 1:0-1.7 for package: docker-1.10.3-46.el7.10.x86_64
+--> Processing Dependency: docker-selinux >= 1.10.3-46.el7.10 for package: docker-1.10.3-46.el7.10.x86_64
+--> Processing Dependency: oci-systemd-hook >= 1:0.1.4-4 for package: docker-1.10.3-46.el7.10.x86_64
+--> Processing Dependency: libseccomp.so.2()(64bit) for package: docker-1.10.3-46.el7.10.x86_64
+---> Package kubernetes-client.x86_64 0:1.2.0-0.13.gitec7364b.el7 will be installed
+---> Package socat.x86_64 0:1.7.2.2-5.el7 will be installed
+--> Running transaction check
+---> Package docker-common.x86_64 0:1.10.3-46.el7.10 will be installed
+---> Package docker-rhel-push-plugin.x86_64 0:1.10.3-46.el7.10 will be installed
+---> Package docker-selinux.x86_64 0:1.10.3-46.el7.10 will be installed
+--> Processing Dependency: policycoreutils-python for package: docker-selinux-1.10.3-46.el7.10.x86_64
+---> Package libseccomp.x86_64 0:2.2.1-1.el7 will be installed
+---> Package oci-register-machine.x86_64 1:0-1.7.git31bbcd2.el7 will be installed
+---> Package oci-systemd-hook.x86_64 1:0.1.4-4.git41491a3.el7 will be installed
+--> Running transaction check
+---> Package policycoreutils-python.x86_64 0:2.2.5-20.el7 will be installed
+--> Processing Dependency: libsemanage-python >= 2.1.10-1 for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: audit-libs-python >= 2.1.3-4 for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: python-IPy for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: checkpolicy for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: libapol.so.4(VERS_4.0)(64bit) for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: libqpol.so.1(VERS_1.4)(64bit) for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: libqpol.so.1(VERS_1.2)(64bit) for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: libapol.so.4()(64bit) for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Processing Dependency: libqpol.so.1()(64bit) for package: policycoreutils-python-2.2.5-20.el7.x86_64
+--> Running transaction check
+---> Package audit-libs-python.x86_64 0:2.4.1-5.el7 will be installed
+---> Package checkpolicy.x86_64 0:2.1.12-6.el7 will be installed
+---> Package libsemanage-python.x86_64 0:2.1.10-18.el7 will be installed
+---> Package python-IPy.noarch 0:0.75-6.el7 will be installed
+---> Package setools-libs.x86_64 0:3.3.7-46.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+=============================================================================================
+ Package                 Arch   Version                    Repository                   Size
+=============================================================================================
+Installing:
+ etcd                    x86_64 2.3.7-2.el7                rhel-x86_64-server-extras-7 6.5 M
+ kubernetes              x86_64 1.2.0-0.13.gitec7364b.el7  rhel-x86_64-server-extras-7  35 k
+Installing for dependencies:
+ audit-libs-python       x86_64 2.4.1-5.el7                rhel-x86_64-server-7         69 k
+ checkpolicy             x86_64 2.1.12-6.el7               rhel-x86_64-server-7        247 k
+ docker                  x86_64 1.10.3-46.el7.10           rhel-x86_64-server-extras-7 9.5 M
+ docker-common           x86_64 1.10.3-46.el7.10           rhel-x86_64-server-extras-7  61 k
+ docker-rhel-push-plugin x86_64 1.10.3-46.el7.10           rhel-x86_64-server-extras-7 2.3 M
+ docker-selinux          x86_64 1.10.3-46.el7.10           rhel-x86_64-server-extras-7  78 k
+ kubernetes-client       x86_64 1.2.0-0.13.gitec7364b.el7  rhel-x86_64-server-extras-7 9.7 M
+ kubernetes-master       x86_64 1.2.0-0.13.gitec7364b.el7  rhel-x86_64-server-extras-7  17 M
+ kubernetes-node         x86_64 1.2.0-0.13.gitec7364b.el7  rhel-x86_64-server-extras-7 9.6 M
+ libseccomp              x86_64 2.2.1-1.el7                rhel-x86_64-server-7         49 k
+ libsemanage-python      x86_64 2.1.10-18.el7              rhel-x86_64-server-7         94 k
+ oci-register-machine    x86_64 1:0-1.7.git31bbcd2.el7     rhel-x86_64-server-extras-7 929 k
+ oci-systemd-hook        x86_64 1:0.1.4-4.git41491a3.el7   rhel-x86_64-server-extras-7  27 k
+ policycoreutils-python  x86_64 2.2.5-20.el7               rhel-x86_64-server-7        435 k
+ python-IPy              noarch 0.75-6.el7                 rhel-x86_64-server-7         32 k
+ setools-libs            x86_64 3.3.7-46.el7               rhel-x86_64-server-7        485 k
+ socat                   x86_64 1.7.2.2-5.el7              rhel-x86_64-server-7        255 k
+
+Transaction Summary
+=============================================================================================
+Install  2 Packages (+17 Dependent packages)
+
+Total download size: 57 M
+Installed size: 270 M
+Downloading packages:
+(1/19): audit-libs-python-2.4.1-5.el7.x86_64.rpm                      |  69 kB  00:00:00
+(2/19): checkpolicy-2.1.12-6.el7.x86_64.rpm                           | 247 kB  00:00:00
+(3/19): docker-1.10.3-46.el7.10.x86_64.rpm                            | 9.5 MB  00:00:00
+(4/19): docker-common-1.10.3-46.el7.10.x86_64.rpm                     |  61 kB  00:00:00
+(5/19): docker-rhel-push-plugin-1.10.3-46.el7.10.x86_64.rpm           | 2.3 MB  00:00:00
+(6/19): docker-selinux-1.10.3-46.el7.10.x86_64.rpm                    |  78 kB  00:00:00
+(7/19): etcd-2.3.7-2.el7.x86_64.rpm                                   | 6.5 MB  00:00:00
+(8/19): kubernetes-1.2.0-0.13.gitec7364b.el7.x86_64.rpm               |  35 kB  00:00:00
+(9/19): kubernetes-client-1.2.0-0.13.gitec7364b.el7.x86_64.rpm        | 9.7 MB  00:00:01
+(10/19): kubernetes-master-1.2.0-0.13.gitec7364b.el7.x86_64.rpm       |  17 MB  00:00:01
+(11/19): kubernetes-node-1.2.0-0.13.gitec7364b.el7.x86_64.rpm         | 9.6 MB  00:00:00
+(12/19): libseccomp-2.2.1-1.el7.x86_64.rpm                            |  49 kB  00:00:00
+(13/19): libsemanage-python-2.1.10-18.el7.x86_64.rpm                  |  94 kB  00:00:00
+(14/19): oci-register-machine-0-1.7.git31bbcd2.el7.x86_64.rpm         | 929 kB  00:00:00
+(15/19): oci-systemd-hook-0.1.4-4.git41491a3.el7.x86_64.rpm           |  27 kB  00:00:00
+(16/19): policycoreutils-python-2.2.5-20.el7.x86_64.rpm               | 435 kB  00:00:00
+(17/19): python-IPy-0.75-6.el7.noarch.rpm                             |  32 kB  00:00:00
+(18/19): setools-libs-3.3.7-46.el7.x86_64.rpm                         | 485 kB  00:00:00
+(19/19): socat-1.7.2.2-5.el7.x86_64.rpm                               | 255 kB  00:00:00
+---------------------------------------------------------------------------------------------
+Total                                                        4.8 MB/s |  57 MB  00:00:11
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : kubernetes-client-1.2.0-0.13.gitec7364b.el7.x86_64                       1/19
+  Installing : kubernetes-master-1.2.0-0.13.gitec7364b.el7.x86_64                       2/19
+  Installing : audit-libs-python-2.4.1-5.el7.x86_64                                     3/19
+  Installing : socat-1.7.2.2-5.el7.x86_64                                               4/19
+  Installing : docker-rhel-push-plugin-1.10.3-46.el7.10.x86_64                          5/19
+  Installing : libsemanage-python-2.1.10-18.el7.x86_64                                  6/19
+  Installing : libseccomp-2.2.1-1.el7.x86_64                                            7/19
+  Installing : python-IPy-0.75-6.el7.noarch                                             8/19
+  Installing : checkpolicy-2.1.12-6.el7.x86_64                                          9/19
+  Installing : 1:oci-systemd-hook-0.1.4-4.git41491a3.el7.x86_64                        10/19
+  Installing : docker-common-1.10.3-46.el7.10.x86_64                                   11/19
+  Installing : 1:oci-register-machine-0-1.7.git31bbcd2.el7.x86_64                      12/19
+  Installing : setools-libs-3.3.7-46.el7.x86_64                                        13/19
+  Installing : policycoreutils-python-2.2.5-20.el7.x86_64                              14/19
+  Installing : docker-selinux-1.10.3-46.el7.10.x86_64                                  15/19
+  Installing : docker-1.10.3-46.el7.10.x86_64                                                           16/19
+  Installing : kubernetes-node-1.2.0-0.13.gitec7364b.el7.x86_64                                         17/19
+  Installing : kubernetes-1.2.0-0.13.gitec7364b.el7.x86_64                                              18/19
+  Installing : etcd-2.3.7-2.el7.x86_64                                                                  19/19
+  Verifying  : kubernetes-master-1.2.0-0.13.gitec7364b.el7.x86_64                                        1/19
+  Verifying  : setools-libs-3.3.7-46.el7.x86_64                                                          2/19
+  Verifying  : 1:oci-register-machine-0-1.7.git31bbcd2.el7.x86_64                                        3/19
+  Verifying  : kubernetes-1.2.0-0.13.gitec7364b.el7.x86_64                                               4/19
+  Verifying  : docker-common-1.10.3-46.el7.10.x86_64                                                     5/19
+  Verifying  : etcd-2.3.7-2.el7.x86_64                                                                   6/19
+  Verifying  : 1:oci-systemd-hook-0.1.4-4.git41491a3.el7.x86_64                                          7/19
+  Verifying  : checkpolicy-2.1.12-6.el7.x86_64                                                           8/19
+  Verifying  : python-IPy-0.75-6.el7.noarch                                                              9/19
+  Verifying  : libseccomp-2.2.1-1.el7.x86_64                                                            10/19
+  Verifying  : kubernetes-node-1.2.0-0.13.gitec7364b.el7.x86_64                                         11/19
+  Verifying  : libsemanage-python-2.1.10-18.el7.x86_64                                                  12/19
+  Verifying  : docker-rhel-push-plugin-1.10.3-46.el7.10.x86_64                                          13/19
+  Verifying  : docker-selinux-1.10.3-46.el7.10.x86_64                                                   14/19
+  Verifying  : docker-1.10.3-46.el7.10.x86_64                                                           15/19
+  Verifying  : socat-1.7.2.2-5.el7.x86_64                                                               16/19
+  Verifying  : kubernetes-client-1.2.0-0.13.gitec7364b.el7.x86_64                                       17/19
+  Verifying  : policycoreutils-python-2.2.5-20.el7.x86_64                                               18/19
+  Verifying  : audit-libs-python-2.4.1-5.el7.x86_64                                                     19/19
+
+Installed:
+  etcd.x86_64 0:2.3.7-2.el7                   kubernetes.x86_64 0:1.2.0-0.13.gitec7364b.el7
+
+Dependency Installed:
+  audit-libs-python.x86_64 0:2.4.1-5.el7                checkpolicy.x86_64 0:2.1.12-6.el7
+  docker.x86_64 0:1.10.3-46.el7.10                      docker-common.x86_64 0:1.10.3-46.el7.10
+  docker-rhel-push-plugin.x86_64 0:1.10.3-46.el7.10     docker-selinux.x86_64 0:1.10.3-46.el7.10
+  kubernetes-client.x86_64 0:1.2.0-0.13.gitec7364b.el7  kubernetes-master.x86_64 0:1.2.0-0.13.gitec7364b.el7
+  kubernetes-node.x86_64 0:1.2.0-0.13.gitec7364b.el7    libseccomp.x86_64 0:2.2.1-1.el7
+  libsemanage-python.x86_64 0:2.1.10-18.el7             oci-register-machine.x86_64 1:0-1.7.git31bbcd2.el7
+  oci-systemd-hook.x86_64 1:0.1.4-4.git41491a3.el7      policycoreutils-python.x86_64 0:2.2.5-20.el7
+  python-IPy.noarch 0:0.75-6.el7                        setools-libs.x86_64 0:3.3.7-46.el7
+  socat.x86_64 0:1.7.2.2-5.el7
+
+Complete!
+[root@cov3lgsdops02vm kulkarnp]#
+
+2)
+
+[root@cov3lgsdops02vm kulkarnp]# vi /etc/etcd/etcd.conf
+
+[root@cov3lgsdops02vm kulkarnp]# cat /etc/etcd/etcd.conf | grep -v "^#"
+ETCD_NAME=default
+ETCD_DATA_DIR="/var/lib/etcd/default.etcd"
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+ETCD_ADVERTISE_CLIENT_URLS="http://localhost:2379"
+
+
+3)
+
+[root@cov3lgsdops02vm kulkarnp]# cat /etc/kubernetes/apiserver | grep -v "^#"
+
+KUBE_API_ADDRESS="--address=0.0.0.0"
+KUBE_API_PORT="--port=8080"
+KUBELET_PORT="--kubelet_port=10250"
+KUBE_ETCD_SERVERS="--etcd_servers=http://127.0.0.1:2379"
+KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=10.5.25.0/24"
+KUBE_ADMISSION_CONTROL="--admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota"
+KUBE_API_ARGS=""
+
+
+
+4) Run this script
+
+[root@cov3lgsdops02vm kulkarnp]# cat enable_start_kube.sh
+for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+done
+
+
+5) Flannel network
+
+[root@cov3lgsdops02vm kulkarnp]# etcdctl mk /atomic.io/network/config '{"Network":"172.17.0.0/16"}'
+{"Network":"172.17.0.0/16"}
+
+
+6) Configure cov3lgsdops01vm as first node (do this on each node)
+
+a) yum -y install flannel kubernetes
+b) 
+
+[root@cov3lgsdops01vm floreaa]# cat /etc/sysconfig/flanneld
+# Flanneld configuration options
+
+# etcd url location.  Point this to the server where etcd runs
+FLANNEL_ETCD="http://10.5.25.204:2379"
+
+# etcd config key.  This is the configuration key that flannel queries
+# For address range assignment
+FLANNEL_ETCD_KEY="/atomic.io/network"
+
+# Any additional options that you want to pass
+#FLANNEL_OPTIONS=""
+
+c) 
+
+[root@cov3lgsdops01vm floreaa]# cat /etc/kubernetes/config
+###
+# kubernetes system config
+#
+# The following values are used to configure various aspects of all
+# kubernetes services, including
+#
+#   kube-apiserver.service
+#   kube-controller-manager.service
+#   kube-scheduler.service
+#   kubelet.service
+#   kube-proxy.service
+# logging to stderr means we get it in the systemd journal
+KUBE_LOGTOSTDERR="--logtostderr=true"
+
+# journal message level, 0 is debug
+KUBE_LOG_LEVEL="--v=0"
+
+# Should this cluster be allowed to run privileged docker containers
+KUBE_ALLOW_PRIV="--allow-privileged=false"
+
+# How the controller-manager, scheduler, and proxy find the apiserver
+KUBE_MASTER="--master=http://10.5.25.204:8080"
+
+
+d)  Create and run node startup script
+
+[root@cov3lgsdops02vm kulkarnp]# cat kube_node_start.sh
+for SERVICES in kube-proxy kubelet docker flanneld; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+done
+
+Run the same on 01vm.
+
+!!!
+!!! If the kube-proxy hangs during startup, with a warning like:
+!!!   "missing br-netfilter module or unset br-nf-call-iptables"
+!!!   and then is freezing.
+!!! Do this:
+!!!   systemctl stop kube-proxy
+!!!   systemctl stop docker
+!!!   ./kube_node_start.sh
+!!!
+
+7) 
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl get nodes
+NAME          STATUS    AGE
+10.5.25.203   Ready     17s
+10.5.25.204   Ready     11m
+
+
+8) Kubernetes Dashboard UI
+
+a) Pull image
+
+[root@cov3lgsdops02vm kulkarnp]# docker pull cov3lgsdops01vm:5000/kubernetes-dashboard-amd64:v1.1.0
+Trying to pull repository cov3lgsdops01vm:5000/kubernetes-dashboard-amd64 ...
+Pulling repository cov3lgsdops01vm:5000/kubernetes-dashboard-amd64
+d023c050c065: Pull complete
+5f70bf18a086: Pull complete
+8214b3ef0d69: Pull complete
+d5018634d05d: Pull complete
+Status: Downloaded newer image for cov3lgsdops01vm:5000/kubernetes-dashboard-amd64:v1.1.0
+
+
+b) Create the kube-system namespace
+
+[root@cov3lgsdops02vm kulkarnp]# cat kube-system.json
+{
+  "kind": "Namespace",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "kube-system"
+  }
+}
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl create -f kube-system.json
+namespace "kube-system" created
+
+c) push the pod-infrastructure container image
+
+[root@linuxdev ~]# docker pull registry.access.redhat.com/rhel7/pod-infrastructure:latest
+Pulling repository registry.access.redhat.com/rhel7/pod-infrastructure
+a183c3aee3f9: Pull complete 
+c453594215e4: Pull complete 
+Status: Downloaded newer image for registry.access.redhat.com/rhel7/pod-infrastructure:latest
+registry.access.redhat.com/rhel7/pod-infrastructure: this image was pulled from a legacy registry.  Important: This registry version will not be supported in future versions of docker.
+You have new mail in /var/spool/mail/root
+[root@linuxdev ~]# docker images
+REPOSITORY                                            TAG                 IMAGE ID            CREATED             SIZE
+cov3lgsdops01vm:5000/hyperkube                        v1.3.4              1e43a355fb64        6 days ago          404.2 MB
+gcr.io/google_containers/hyperkube                    v1.3.4              1e43a355fb64        6 days ago          404.2 MB
+cov3lgsdops01vm:5000/kubernetes-dashboard-amd64       v1.1.0              d023c050c065        3 weeks ago         58.65 MB
+gcr.io/google_containers/kubernetes-dashboard-amd64   v1.1.0              d023c050c065        3 weeks ago         58.65 MB
+registry.access.redhat.com/rhel7/pod-infrastructure   latest              ee020ceeef01        12 weeks ago        215.4 MB
+cov3lgsdops01vm:5000/etcd                             2.0.5.1             03ad48d15872        16 months ago       15.11 MB
+kubernetes/etcd                                       2.0.5.1             03ad48d15872        16 months ago       15.11 MB
+
+[root@linuxdev ~]# docker tag registry.access.redhat.com/rhel7/pod-infrastructure:latest cov3lgsdops01vm:5000/pod-infrastructure:latest
+[root@linuxdev ~]# docker push  cov3lgsdops01vm:5000/pod-infrastructure:latest
+The push refers to a repository [cov3lgsdops01vm:5000/pod-infrastructure]
+fdd73c81c68e: Image successfully pushed 
+afafa291bfcc: Image successfully pushed 
+Pushing tag for rev [ee020ceeef01] on {http://cov3lgsdops01vm:5000/v1/repositories/pod-infrastructure/tags/latest}
+
+[root@cov3lgsdops02vm kulkarnp]# docker pull cov3lgsdops01vm:5000/pod-infrastructure:latest
+Trying to pull repository cov3lgsdops01vm:5000/pod-infrastructure ...
+Pulling repository cov3lgsdops01vm:5000/pod-infrastructure
+ee020ceeef01: Pull complete
+afafa291bfcc: Pull complete
+Status: Downloaded newer image for cov3lgsdops01vm:5000/pod-infrastructure:latest
+
+
+d) create a yml file for the UI Dashboard and run this:
+
+[root@cov3lgsdops02vm kulkarnp]# kubectl create -f kubernetes-dashboard.yml
+deployment "kubernetes-dashboard" created
+You have exposed your service on an external port on all nodes in your
+cluster.  If you want to expose this service to the external internet, you may
+need to set up firewall rules for the service port(s) (tcp:31585) to serve traffic.
+
+See http://releases.k8s.io/release-1.2/docs/user-guide/services-firewalls.md for more details.
+service "kubernetes-dashboard" created
+
+
+
+
+------------------------------------------------------------------------------
+
+Point Kubernetes to private docker registry
+
+------------------------------------------------------------------------------
+
+
+1) [root@cov3lgsdops01vm kulkarnp]# cat /etc/kubernetes/kubelet  | grep -v "^#"
+
+
+KUBELET_ADDRESS="--address=0.0.0.0"
+KUBELET_PORT="--port=10250"
+KUBELET_HOSTNAME="--hostname_override=10.5.25.203"
+KUBELET_API_SERVER="--api_servers=http://10.5.25.204:8080"
+KUBELET_ARGS=""
+KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=localhost:5000/pod-infrastructure:latest"
+
+On the other machine is cov3lgsdops01vm:5000/pod-infrastructure:latest
+
+2) 
+
+
+
+
